@@ -12,7 +12,6 @@ extension Array where Element:Comparable {
                     self[j] = self[i]
                     self[i] = temp
                 }
-                print(self)
             }
         }
         return self
