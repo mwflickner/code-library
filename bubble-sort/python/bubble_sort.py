@@ -9,7 +9,7 @@ def bubbleSort(thelist):
                 thelist[j] = thelist[j - 1]
                 thelist[j - 1] = temp
                 swapOccured = True
-        if swapOccured is False:
+        if not swapOccured:
             break
     return thelist
 
