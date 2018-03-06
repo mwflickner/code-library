@@ -1,19 +1,19 @@
-def bubbleSort(thelist):
-    if len(thelist) < 2:
-        return thelist
-    for i in range(len(thelist)):
+def bubble_sort(the_list):
+    if len(the_list) < 2:
+        return the_list
+    for i in range(len(the_list)):
         swapOccured = False
-        for j in range(1, len(thelist) - i):
-            if thelist[j] < thelist[j - 1]:
-                temp = thelist[j]
-                thelist[j] = thelist[j - 1]
-                thelist[j - 1] = temp
+        for j in range(1, len(the_list) - i):
+            if the_list[j] < the_list[j - 1]:
+                temp = the_list[j]
+                the_list[j] = the_list[j - 1]
+                the_list[j - 1] = temp
                 swapOccured = True
         if not swapOccured:
             break
-    return thelist
+    return the_list
 
-alist = [4, 6, 2, 3, 8, 5]
-print(alist)
-bubbleSort(alist)
-print(alist)
+a_list = [4, 6, 2, 3, 8, 5]
+print(a_list)
+bubble_sort(a_list)
+print(a_list)
