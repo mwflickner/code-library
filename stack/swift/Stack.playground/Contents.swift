@@ -1,84 +1,127 @@
-//: Playground - noun: a place where people can play
+import Foundation
 
-import UIKit
-
-class StackItem {
-    var itemAbove: StackItem?
-    var itemBelow: StackItem?
-    private var data: Int?
-    
-    init(data: Int, itemAbove: StackItem? = nil, itemBelow: StackItem? = nil) {
-        self.data = data
-        self.itemAbove = itemAbove
-        self.itemBelow = itemBelow
-    }
-    
-    func getData() -> Int? {
-        return data
-    }
+protocol Stack {
+    associatedtype T
+    func push(_ item: T)
+    func pop() throws -> T
+    func peek() throws -> T
+    var size: Int { get }
+    var isEmpty: Bool {get}
 }
 
-class Stack {
-    private var top: StackItem?
-    private var count: Int = 0
-    
-    init(){
+enum StackError: Error {
+    case EmptyStack
+}
+
+class LinkedStack<T> : Stack {
+    private class Node {
+        var item: T
+        var next: Node?
         
-    }
-    
-    func getCount() -> Int {
-        return count
-    }
-    
-    func push(item: StackItem){
-        item.itemBelow = top
-        if top != nil {
-            top?.itemAbove = item
+        init(_ item: T, _ next: Node?){
+            self.item = item
+            self.next = next
         }
-        top = item
-        count += 1
     }
     
-    func pop() -> Int? {
-        let poppedItem = top
-        top = top?.itemBelow
-        count = poppedItem != nil ? count - 1 : count
-        return poppedItem?.getData()
+    private var top: Node?
+    var size = 0
+    var isEmpty: Bool {
+        return top == nil
     }
     
-    func peak() -> Int? {
-        return top?.getData()
+    func push(_ item: T) {
+        let newNode = Node(item, self.top)
+        self.top = newNode
+        self.size += 1
     }
     
-    func clear(){
-        while top != nil {
-            top = top?.itemBelow
+    func pop() throws -> T {
+        guard let topNode = self.top else {
+            throw StackError.EmptyStack
         }
-        count = 0
+        self.top = topNode.next
+        self.size -= 1
+        return topNode.item
+    }
+    
+    func peek() throws -> T {
+        guard let topNode = self.top else {
+            throw StackError.EmptyStack
+        }
+        return topNode.item
     }
 }
 
-func stackTests(){
-    let stack = Stack()
-    assert(stack.getCount() == 0)
-    assert(stack.peak() == nil)
-    assert(stack.pop() == nil)
-    let one = StackItem(data: 1)
-    let two = StackItem(data: 2)
-    let three = StackItem(data: 3)
-    stack.push(item: one)
-    assert(stack.getCount() == 1)
-    assert(stack.peak()! == one.getData())
-    stack.push(item: two)
-    assert(stack.getCount() == 2)
-    assert(stack.peak()! == two.getData())
-    assert(stack.pop() == two.getData())
-    assert(stack.getCount() == 1)
-    stack.push(item: three)
-    assert(stack.getCount() == 2)
-    assert(stack.peak() == three.getData())
-    stack.clear()
-    assert(stack.getCount() == 0)
+class BoundedStack<T> : Stack {
+    private var array: [T] = []
+    var size: Int {
+        return self.array.count
+    }
+    var isEmpty: Bool {
+        return self.array.isEmpty
+    }
+    func push(_ item: T){
+        self.array.insert(item, at: 0)
+    }
+    func pop() throws -> T {
+        guard self.array.first != nil else {
+            throw StackError.EmptyStack
+        }
+        return self.array.remove(at: 0)
+    }
+    func peek() throws -> T {
+        guard let first = self.array.first else {
+            throw StackError.EmptyStack
+        }
+        return first
+    }
+
 }
 
-stackTests()
+var linkedStack = LinkedStack<Int>()
+var boundedStack = BoundedStack<Int>()
+
+func stackTests<A: Stack>(_ stack: A) where A.T == Int{
+    assert(stack.isEmpty)
+    stack.push(1)
+    assert(stack.size == 1)
+    assert(!stack.isEmpty)
+    stack.push(2)
+    assert(stack.size == 2)
+    var size = stack.size
+    while !stack.isEmpty {
+        do {
+            let peek = try stack.peek()
+            print(peek)
+            assert(peek == size)
+            let pop = try stack.pop()
+            assert(pop == size)
+            size -= 1
+            assert(size == stack.size)
+        } catch {
+            fatalError("Unexpected Throw")
+        }
+    }
+    assert(stack.size == 0)
+    do {
+        try stack.pop()
+    } catch StackError.EmptyStack {
+
+    } catch {
+        fatalError("Incorrect throw type \(error.localizedDescription)")
+    }
+    do {
+        try stack.peek()
+    } catch StackError.EmptyStack {
+
+    } catch {
+        fatalError("Incorrect throw type  \(error.localizedDescription)")
+    }
+    
+    
+}
+
+stackTests(linkedStack)
+stackTests(boundedStack)
+print("tests passed")
