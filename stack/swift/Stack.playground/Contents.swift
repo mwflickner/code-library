@@ -53,7 +53,7 @@ class LinkedStack<T> : Stack {
     }
 }
 
-class BoundedStack<T> : Stack {
+class ArrayStack<T> : Stack {
     private var array: [T] = []
     var size: Int {
         return self.array.count
@@ -80,20 +80,20 @@ class BoundedStack<T> : Stack {
 }
 
 var linkedStack = LinkedStack<Int>()
-var boundedStack = BoundedStack<Int>()
+var arrayStack = ArrayStack<Int>()
 
-func stackTests<A: Stack>(_ stack: A) where A.T == Int{
+func stackTests<A: Stack>(_ stack: A) where A.T == Int {
     assert(stack.isEmpty)
-    stack.push(1)
-    assert(stack.size == 1)
-    assert(!stack.isEmpty)
-    stack.push(2)
-    assert(stack.size == 2)
     var size = stack.size
+    while stack.size < 2 {
+        stack.push(stack.size + 1)
+        size += 1
+        assert(!stack.isEmpty)
+        assert(stack.size == size)
+    }
     while !stack.isEmpty {
         do {
             let peek = try stack.peek()
-            print(peek)
             assert(peek == size)
             let pop = try stack.pop()
             assert(pop == size)
@@ -123,5 +123,5 @@ func stackTests<A: Stack>(_ stack: A) where A.T == Int{
 }
 
 stackTests(linkedStack)
-stackTests(boundedStack)
+stackTests(arrayStack)
 print("tests passed")
